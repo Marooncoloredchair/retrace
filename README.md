@@ -2,7 +2,7 @@
 
 ReTrace walks you back to something you put down. The phone in your pocket measures the walk. A ring on your finger buzzes faster as you get closer. A laptop keeps the path and drives the ring.
 
-This is the system we are taking to Hack Princeton, and it is still being tuned. The path is good enough to fold a short out-and-back. A long leg can still drift.
+This is the system we are taking to Hack Princeton.
 
 ## How a session works
 
@@ -56,7 +56,11 @@ Plots in [docs/](docs/). Recordings and camera frames stay on the machine that r
 - [walk_01.png](docs/walk_01.png) — gyro yaw through a segmented walk, with the turning stretches marked.
 - [find_heat_mark_2.png](docs/find_heat_mark_2.png) — place-find heat around one put-down, from the ring camera.
 
-On the still-turn recording, after the walking-rhythm gate, the dot moved 0 m. On the back-and-forth recording, the return passed within 0.02 m of the outbound path. The same recording still ended 6.1 m from the start, because the last leg kept going.
+On the still-turn recording, after the walking-rhythm gate, the dot moved 0 m. On the back-and-forth recording, the return passed within 0.02 m of the outbound path.
+
+## Known limitations
+
+A short out-and-back folds back on itself. A long leg can still drift. On that same back-and-forth recording, the path ended 6.1 m from the start after the return had already come back to the outbound line.
 
 ## What stays off GitHub
 
