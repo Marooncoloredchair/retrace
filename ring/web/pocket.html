@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>ReTrace pocket</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101418;
+      --card: #1a212b;
+      --text: #e8eef6;
+      --muted: #93a0b0;
+      --line: #2c3848;
+      --ok: #b6f27c;
+      --warn: #f3e2b0;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font: 18px/1.4 "Segoe UI", system-ui, sans-serif;
+      padding: 20px 16px calc(24px + env(safe-area-inset-bottom));
+    }
+    main { max-width: 520px; margin: 0 auto; }
+    .eyebrow { margin: 0; color: var(--muted); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+    h1 { margin: 4px 0 8px; font-size: 28px; }
+    p { margin: 8px 0; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+    .row { display: flex; gap: 16px; }
+    .stat { flex: 1; }
+    .stat span { display: block; color: var(--muted); font-size: 13px; }
+    .stat strong { font-size: 22px; font-variant-numeric: tabular-nums; }
+    .row.four { gap: 8px; }
+    #word {
+      margin: 0;
+      font-size: clamp(40px, 12vw, 64px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    #word[data-facing="yes"] { color: var(--ok); }
+    #word[data-arrived="yes"] { color: var(--ok); }
+    #away { margin: 8px 0 0; font-size: 28px; }
+    label { display: block; color: var(--muted); font-size: 14px; margin-bottom: 6px; }
+    input[type="text"], input[type="range"] {
+      width: 100%;
+      font: inherit;
+      color: var(--text);
+      background: #0d1218;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    button {
+      width: 100%;
+      margin-top: 10px;
+      font: 600 18px/1 system-ui, sans-serif;
+      color: #101418;
+      background: var(--ok);
+      border: 0;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    button.quiet {
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--line);
+    }
+    .check { display: flex; align-items: center; gap: 8px; color: var(--text); margin-top: 12px; }
+    .check input { width: auto; }
+    .small { color: var(--muted); font-size: 14px; }
+    .rose { margin: 4px 0 8px; }
+    .rose svg {
+      display: block;
+      width: min(74vw, 280px);
+      height: auto;
+      margin: 0 auto;
+    }
+    .rose-face { fill: #0d1218; stroke: var(--line); stroke-width: 3; }
+    .rose-ticks { fill: none; stroke: #93a0b0; stroke-width: 2; }
+    .rose-letters { fill: #93a0b0; font: 700 15px/1 system-ui, sans-serif; }
+    #rose-phone { fill: var(--text); }
+    #rose-mark { color: var(--warn); }
+    #rose-mark line { stroke: currentColor; stroke-width: 3; }
+    #rose-mark circle { fill: currentColor; }
+    #rose-mark[data-facing="yes"] { color: var(--ok); }
+    .rose-hub { fill: var(--text); }
+    #rose-caption { text-align: center; margin: 8px 0 0; }
+    details { margin-top: 8px; }
+    summary { cursor: pointer; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">ReTrace</p>
+    <h1>Direction guide</h1>
+    <p class="small">Hold the phone upright, screen facing you, as if you are reading it. The back of the phone points the way you are looking. Flat, screen up, camera end pointing that same way, is the same heading. Do not turn the screen face down. Walking does not move the mark.</p>
+
+    <section class="card">
+      <div id="rose" class="rose">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="64" class="rose-face"></circle>
+          <g class="rose-ticks">
+            <path d="M100 36 L100 48"></path>
+            <path d="M100 152 L100 164"></path>
+            <path d="M36 100 L48 100"></path>
+            <path d="M152 100 L164 100"></path>
+            <path d="M100 36 L100 46" transform="rotate(45 100 100)"></path>
+            <path d="M100 36 L100 46" transform="rotate(135 100 100)"></path>
+            <path d="M100 36 L100 46" transform="rotate(225 100 100)"></path>
+            <path d="M100 36 L100 46" transform="rotate(315 100 100)"></path>
+          </g>
+          <g class="rose-letters">
+            <text x="100" y="24" text-anchor="middle">N</text>
+            <text x="184" y="105" text-anchor="middle">E</text>
+            <text x="100" y="186" text-anchor="middle">S</text>
+            <text x="16" y="105" text-anchor="middle">W</text>
+          </g>
+          <g id="rose-mark" hidden>
+            <line x1="100" y1="100" x2="100" y2="48"></line>
+            <circle cx="100" cy="36" r="8"></circle>
+          </g>
+          <g id="rose-phone">
+            <polygon points="100,52 112,98 100,86 88,98"></polygon>
+          </g>
+          <circle cx="100" cy="100" r="4" class="rose-hub"></circle>
+        </svg>
+        <p id="rose-caption" class="small">The arrow is the camera end. The dot is the marked direction.</p>
+      </div>
+      <div class="row four">
+        <div class="stat"><span>Raw</span><strong id="raw-heading">—</strong></div>
+        <div class="stat"><span>Tilt-safe</span><strong id="heading">0°</strong></div>
+        <div class="stat"><span>Target</span><strong id="marked">—</strong></div>
+        <div class="stat"><span>Difference</span><strong id="diff">—</strong></div>
+      </div>
+      <p id="compass-line" class="small">Tap enable. Safari asks for compass access only after that tap.</p>
+      <button id="enable" type="button">Enable compass</button>
+    </section>
+
+    <section class="card">
+      <label for="name">Name, if you want one</label>
+      <input id="name" type="text" maxlength="40" placeholder="Corner" autocomplete="off">
+      <button id="mark" type="button">Mark this direction</button>
+      <p id="mark-line" class="small"></p>
+    </section>
+
+    <section class="card" aria-live="polite">
+      <p id="word">Ready</p>
+      <p id="away">—</p>
+      <p id="hint" class="small">Point the camera end, then mark that direction.</p>
+      <p id="ring-line" class="small">The ring pulses when the camera end points the way you marked.</p>
+      <label class="check"><input id="beep" type="checkbox" checked> Beep when you are facing it</label>
+      <button id="guide" type="button">Point me that way</button>
+      <button id="pulse-once" class="quiet" type="button">Pulse the ring once</button>
+      <button id="stop" class="quiet" type="button" hidden>Stop guide</button>
+      <button id="reset" class="quiet" type="button">Start over</button>
+    </section>
+
+    <details>
+      <summary>Practice without a compass</summary>
+      <div class="card">
+        <label for="practice-heading">Heading <span id="practice-value"></span></label>
+        <input id="practice-heading" type="range" min="0" max="359" value="0">
+        <p class="small">A real compass takes over once Safari provides it. Straight means within 25° of the marked direction. A compass reading worse than ±40° is ignored. A mark is stored only once the compass has settled: accuracy ±25° or better, and the recent readings within 15° of their average. Until then the page says the compass is still settling. Difference is target minus tilt-safe heading, positive to the right.</p>
+      </div>
+    </details>
+  </main>
+  <script src="/pocket.js"></script>
+  <script>
+    const range = document.getElementById("practice-heading");
+    const value = document.getElementById("practice-value");
+    const show = function () { value.textContent = range.value + "°"; };
+    range.addEventListener("input", show);
+    show();
+  </script>
+</body>
+</html>

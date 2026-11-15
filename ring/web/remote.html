@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ReTrace remote</title>
+  <link rel="stylesheet" href="/static/remote.css">
+</head>
+<body>
+  <h1>ReTrace</h1>
+  <p id="ring" class="live">Ring connected: no</p>
+  <p id="camera" class="live">Camera: on</p>
+  <p id="rate" class="live">IMU rate: 0 Hz</p>
+  <p id="gate" class="live">Walking gate: closed</p>
+  <p id="steps" class="status">Steps: —</p>
+  <p id="result" class="result"></p>
+  <p id="drops" class="result"></p>
+  <h2>Step test</h2>
+  <label for="meters">Distance in metres</label>
+  <input id="meters" inputmode="decimal" autocomplete="off" placeholder="for calibration, e.g. 10">
+  <button id="calib" type="button">Start calibration</button>
+  <button id="swing" type="button">Start swing loop</button>
+  <button id="carry" type="button">Start carry loop</button>
+  <button id="end" class="stop" type="button" disabled>End</button>
+  <button id="resume" type="button" disabled>Resume camera</button>
+  <p id="item">No item yet</p>
+  <p id="status" class="status">Idle</p>
+  <div class="heat" aria-label="Heat"><div id="fill"></div></div>
+  <button id="mark" type="button">Mark put-down</button>
+  <button id="find" type="button">Start Find</button>
+  <button id="stop" class="stop" type="button">Stop Find</button>
+  <p id="note" class="note"></p>
+  <script src="/static/remote.js"></script>
+</body>
+</html>

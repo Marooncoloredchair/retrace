@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0F1420">
+  <meta name="color-scheme" content="dark">
+  <meta name="application-name" content="ReTrace">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ReTrace">
+  <meta name="format-detection" content="telephone=no">
+  <title>ReTrace</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/static/phone.css">
+</head>
+<body>
+  <header>
+    <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <circle cx="20" cy="32" r="12.5" stroke="#FFB020" stroke-width="4"></circle>
+      <path d="M31 23C45 11 57 25 49 39C41 53 25 51 21 41C18 33 23 29 27 33" stroke="#FFB020" stroke-width="2.7" stroke-linecap="round" stroke-dasharray="1.15 4.4"></path>
+    </svg>
+    <h1>ReTrace</h1>
+  </header>
+
+  <p class="status-row">
+    <span id="phone-pill" class="pill">Phone: …</span>
+    <span id="ring-pill" class="pill">Ring: …</span>
+    <span id="gate-pill" class="pill" hidden></span>
+  </p>
+  <p id="offline" class="note" hidden>The phone cannot see the laptop.</p>
+  <p id="note" class="note" role="status"></p>
+
+  <main id="home">
+    <p class="hint">Stand at the object and press Save. Tap a saved item to walk back to it.</p>
+    <form id="save-form">
+      <label for="save-name">Name</label>
+      <input id="save-name" type="text" maxlength="40" placeholder="Keys" autocomplete="off" enterkeyhint="done" aria-label="Item name">
+      <button id="save-button" class="primary" type="submit">Save</button>
+    </form>
+    <ul id="items" class="items" aria-label="Saved items"></ul>
+    <p id="empty" class="hint">Nothing saved yet.</p>
+  </main>
+
+  <section id="find" hidden>
+    <p id="find-name" class="find-name"></p>
+    <svg id="arrow" class="arrow" viewBox="0 0 100 100" aria-hidden="true">
+      <polygon id="arrow-mark" points="50,8 84,78 50,62 16,78" fill="#FFB020"></polygon>
+    </svg>
+    <p id="turn" class="turn"></p>
+    <p id="distance" class="distance"><span id="metres">—</span><span id="unit" class="unit" hidden> m</span></p>
+    <canvas id="map" width="640" height="336" aria-label="Path, pin, and your position"></canvas>
+    <button id="stop" class="stop" type="button">Stop</button>
+  </section>
+
+  <script src="/static/phone.js"></script>
+</body>
+</html>

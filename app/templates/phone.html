@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="retrace-auth" content="__AUTH__">
+  <meta name="retrace-token" content="__TOKEN__">
+  <title>ReTrace Phone</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">ReTrace</p>
+    <h1>iPhone camera</h1>
+    <p id="badge" class="badge" aria-live="polite">Camera off</p>
+    <p id="detail" class="detail">Tap Start Camera. Safari asks to allow the camera only after that tap. Nothing is sent until you do.</p>
+    <video id="preview" class="preview phone-preview" playsinline muted autoplay disablepictureinpicture></video>
+    <p id="cameraInfo" class="note"></p>
+    <button id="start" class="mark-btn primary camera-go" type="button">Start Camera</button>
+    <button id="stop" class="mark-btn camera-stop" type="button" disabled>Stop Camera</button>
+    <p id="error" class="error" hidden></p>
+    <section id="guide" aria-label="Guided experiment">
+      <p class="note">Keep Safari open and the phone unlocked. Turn off Silent Mode and turn the volume up. The voice uses the ringer. Every guided experiment speaks the steps: one resting view, several arm positions, and the three return trials. The return trials reuse the desk corner already saved. Nothing new is saved as Location A. Stand at the desk, press Start test once, and follow the voice. The last step of the return trials is a place where the desk is not visible.</p>
+      <div id="guideSetup">
+        <div class="duration-row">
+          <label>Walk away <input id="awaySeconds" type="number" min="3" max="60" value="8"> s</label>
+          <label>Walk back <input id="backSeconds" type="number" min="3" max="60" value="8"> s</label>
+        </div>
+        <div class="view-choice">
+          <label><input type="radio" name="guideView" value="returns" checked> Three return trials</label>
+          <label><input type="radio" name="guideView" value="multi"> Several arm positions</label>
+          <label><input type="radio" name="guideView" value="single"> One resting view</label>
+        </div>
+      </div>
+      <p id="guideCount" class="guide-count" hidden>5</p>
+      <p id="guideStage" class="guide-stage">Ready</p>
+      <p id="guideInstruction" class="detail"></p>
+      <p id="guideNext" class="note"></p>
+      <p id="guideScore" class="detail"></p>
+      <button id="guideStart" class="mark-btn primary camera-go" type="button">Start test</button>
+      <button id="guideStop" class="mark-btn camera-stop" type="button" disabled>Stop test</button>
+    </section>
+    <p id="failureCall" class="detail" aria-live="polite">The laptop shows why each frame matched or stayed UNKNOWN.</p>
+    <p class="place-call compact" aria-live="polite">
+      <span><span class="call-label">Raw</span> <span id="rawCall">—</span></span>
+      <span><span class="call-label">Stable</span> <span id="stableCall">—</span></span>
+    </p>
+    <details class="extra">
+      <summary>Walk marks, if you still want them</summary>
+      <p id="markFlash" class="mark-flash" aria-live="assertive">The A check on the laptop does not need these buttons.</p>
+      <div class="mark-grid">
+        <button class="mark-btn primary" type="button" data-mark="start">Start test</button>
+        <button class="mark-btn" type="button" data-mark="stop" disabled>End test</button>
+        <button class="mark-btn" type="button" data-mark="LEFT_SAVED_LOCATION" disabled>Left saved location</button>
+        <button class="mark-btn" type="button" data-mark="ARRIVED_A" disabled>Arrived at A</button>
+        <button class="mark-btn" type="button" data-mark="ARRIVED_B" disabled>Arrived at B</button>
+        <button class="mark-btn" type="button" data-mark="ARRIVED_C" disabled>Arrived at C</button>
+      </div>
+      <p id="phoneTestState" class="detail">Not testing.</p>
+    </details>
+    <section class="stats" aria-label="Stream performance">
+      <div class="stat"><span>Sending FPS</span><strong id="fps">—</strong></div>
+      <div class="stat"><span>Frames sent</span><strong id="sent">0</strong></div>
+      <div class="stat"><span>Frames dropped</span><strong id="dropped">0</strong></div>
+      <div class="stat"><span>Last frame</span><strong id="size">—</strong></div>
+      <div class="stat"><span>Socket</span><strong id="socket">closed</strong></div>
+    </section>
+    <aside class="warning">
+      ReTrace does not record video on this phone. Keep Safari open and the phone unlocked for the whole spoken test. The laptop stores the log. The guided test uses a fresh Location A and does not change the places already saved.
+      Anyone with this exact link can send a camera and press the walk marks. They cannot open the laptop page, clear the saved places, or download the log. Do not share the link, the QR code, or screenshots of either.
+    </aside>
+    <canvas id="frame" class="capture-canvas" width="320" height="240" aria-hidden="true"></canvas>
+  </main>
+  <noscript><p class="error">Turn on JavaScript in Safari to use the camera.</p></noscript>
+  <script src="/static/phone.js?v=20261031-voice2"></script>
+</body>
+</html>

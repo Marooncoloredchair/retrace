@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReTrace</title>
+  <meta name="theme-color" content="#0F1420">
+  <link rel="icon" href="/static/icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <circle cx="20" cy="32" r="12.5" stroke="#FFB020" stroke-width="4"></circle>
+        <path d="M31 23C45 11 57 25 49 39C41 53 25 51 21 41C18 33 23 29 27 33" stroke="#FFB020" stroke-width="2.7" stroke-linecap="round" stroke-dasharray="1.15 4.4"></path>
+      </svg>
+      <h1>ReTrace</h1>
+    </div>
+    <span id="pill-link" class="pill bad">Ring: starting</span>
+    <span id="pill-imu" class="pill bad">IMU: waiting</span>
+    <span id="pill-motor" class="pill">Vibration: -</span>
+    <span id="pill-mapper" class="pill quiet">Mapper: none</span>
+    <span id="pill-service" class="pill bad">Dashboard: connecting</span>
+  </header>
+
+  <section class="card wide" id="body-card">
+    <h2>Find from your pocket</h2>
+    <p class="steps">1. Stand at the object and press Save. 2. Walk away. 3. Press Find on that item.</p>
+    <p id="body-guide">Waiting for the phone.</p>
+    <p id="body-frame" class="small">Session —, offset —, unset.</p>
+    <p id="body-live" class="small">Waiting for the phone.</p>
+    <form id="save-form" class="row">
+      <input id="save-name" type="text" maxlength="40" placeholder="Keys" autocomplete="off" aria-label="Item name">
+      <button id="btn-save" type="submit">Save</button>
+    </form>
+    <div id="save-status" class="banner" role="status" aria-live="polite" hidden></div>
+    <p id="save-hint" class="small"></p>
+    <div id="items-msg" class="banner error" role="alert" hidden></div>
+    <ul id="items" class="items"></ul>
+    <p id="items-empty" class="small">Nothing saved yet.</p>
+    <p id="body-loop" class="small"></p>
+    <div class="heading-row">
+      <canvas id="heading-dial" width="180" height="180" aria-label="Live heading dial"></canvas>
+      <p id="heading-dial-note" class="small">The needle is the way your body is facing. During Find it should swing toward the pin.</p>
+    </div>
+    <canvas id="body-map" width="900" height="420"></canvas>
+    <div class="row">
+      <button id="btn-stop-find" type="button">Stop finding</button>
+      <button id="btn-body-recalibrate" type="button">Recalibrate</button>
+      <button id="btn-body-replay" type="button">Save replay</button>
+      <button id="btn-body-export" type="button">Save map image</button>
+    </div>
+  </section>
+
+  <details class="extra">
+  <summary>Camera, calibration, and logs</summary>
+
+  <section class="card wide mode-bar">
+    <div id="mode-memory" class="mode">CONTINUOUS MEMORY</div>
+    <div id="mode-save" class="mode">NO ITEM YET</div>
+    <div id="mode-anchor" class="mode quiet">ANCHOR -</div>
+    <div id="mode-search" class="mode">IDLE</div>
+  </section>
+
+  <main>
+    <section class="column">
+      <div class="card">
+        <div class="feed">
+          <img id="live" alt="Live ring camera">
+          <div id="live-cover">Ring not connected</div>
+        </div>
+        <p id="frame-line" class="small">Waiting for the first camera frame.</p>
+      </div>
+
+      <div class="card">
+        <h2>Tracking</h2>
+        <div id="track-status" class="status idle">IDLE</div>
+        <p id="track-phase" class="phase"></p>
+        <p id="track-text">Press Find on a saved item to start.</p>
+        <p id="track-detail" class="small"></p>
+        <div id="heat-wrap" class="heat-wrap" hidden>
+          <div class="heat-label"><span>Heat</span><span id="heat-value">0.00</span></div>
+          <div class="heat-bar"><div id="heat-fill"></div></div>
+          <p id="heat-meta" class="small"></p>
+        </div>
+        <div class="pair">
+          <figure id="fig-matched" hidden>
+            <img id="img-matched" alt="Recognised landmark">
+            <figcaption id="cap-matched">Recognised landmark</figcaption>
+          </figure>
+          <figure id="fig-next" hidden>
+            <img id="img-next" alt="Next recorded view">
+            <figcaption id="cap-next">Next recorded view toward the item</figcaption>
+          </figure>
+        </div>
+        <div id="place-card" class="place-card" hidden>
+          <p id="place-name" class="phase"></p>
+          <p id="place-desc" class="small"></p>
+          <figure id="fig-lastseen" hidden>
+            <img id="img-lastseen" alt="Last seen">
+            <figcaption>Last seen</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="column">
+      <div class="card">
+        <h2>Put-down</h2>
+        <p class="small">Mark when you put something down so the IMU detector can be compared to a ground-truth label.</p>
+        <button id="btn-mark-putdown" type="button">Mark put-down</button>
+        <p id="putdown-line" class="small"></p>
+      </div>
+
+      <div class="card">
+        <h2>Motor feedback</h2>
+        <p class="small">One command is one 200 ms pulse. That is the only vibration the ring's firmware has, so a progress pulse and an arrival pulse feel the same. Pulses fire only for confirmed progress and arrival.</p>
+        <label class="toggle"><input id="motor-enabled" type="checkbox"> Vibrate on confirmed progress and arrival</label>
+        <button id="btn-test-pulse" type="button">Send one test pulse</button>
+        <p id="motor-line" class="small"></p>
+        <ul id="motor-log" class="log"></ul>
+      </div>
+
+      <div class="card">
+        <h2>Ring and memory</h2>
+        <p id="ring-line" class="small"></p>
+        <p id="imu-line" class="small"></p>
+        <p id="memory-line" class="small"></p>
+        <p id="reject-line" class="small"></p>
+        <p id="usable-line" class="small"></p>
+      </div>
+    </section>
+  </main>
+
+  <section class="card wide" id="pdr-card" hidden>
+    <h2>Walk map</h2>
+    <p class="small">Top-down path from the ring IMU. Green is arm-swing, orange is carried (low confidence), grey is still. Pins are saved items.</p>
+    <canvas id="pdr-map" width="900" height="420"></canvas>
+    <p id="pdr-line" class="small"></p>
+  </section>
+
+  <section class="card wide">
+    <h2 id="timeline-title">Breadcrumb timeline</h2>
+    <p class="small">Pictures in the order the ring recorded them, starting at the saved spot. This is a timeline, not a map: it has no distances, no directions and no room shape.</p>
+    <div id="timeline" class="strip"></div>
+    <p id="timeline-note" class="small"></p>
+  </section>
+
+  <section class="card wide">
+    <h2>Recent visual memory</h2>
+    <p class="small">Continuous observations. Blurry and partly covered frames are kept here. Clearer landmarks are marked.</p>
+    <div id="recent" class="strip"></div>
+  </section>
+
+  <section class="card wide">
+    <h2>Activity</h2>
+    <ul id="notices" class="log"></ul>
+  </section>
+
+  <section class="card wide">
+    <h2>Step length and loop</h2>
+    <div class="row">
+      <button id="btn-body-arm" type="button">Start step-length walk</button>
+      <input id="body-metres" type="number" min="0.1" max="500" step="0.1" value="10" aria-label="Metres walked">
+      <button id="btn-body-calibrate" type="button">Set step length</button>
+      <button id="btn-loop-start" type="button">Loop start</button>
+      <button id="btn-loop-end" type="button">Loop end</button>
+    </div>
+  </section>
+  </details>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

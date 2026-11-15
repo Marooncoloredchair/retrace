@@ -1,0 +1,4 @@
+# Built and tested with Python 3.12.
+cadquery==2.8.0
+# Only for check_fit.py (STL watertight check):
+trimesh==5.2.0

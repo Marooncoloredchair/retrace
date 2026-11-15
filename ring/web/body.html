@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReTrace phone</title>
+  <style>
+    body { margin: 0; padding: 16px; background: #111417; color: #e8ecef; font: 16px/1.45 system-ui, sans-serif; }
+    button, input { font: inherit; padding: 10px 14px; }
+    p { max-width: 36rem; }
+    .dim { color: #9aa5b0; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    canvas { background: #101418; border-radius: 12px; }
+    li { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Phone in pocket</h1>
+  <p class="dim">Save stores where you are. Find shows the distance and an arrow toward the saved spot. Press P to save the name in the box.</p>
+  <form id="save-form" class="row">
+    <input id="save-name" type="text" maxlength="40" placeholder="Keys" aria-label="Item name">
+    <button type="submit">Save</button>
+  </form>
+  <p id="save-status" class="dim"></p>
+  <canvas id="guide" width="280" height="280" aria-label="Direction to the saved item"></canvas>
+  <p id="guide-line" class="dim">No Find yet.</p>
+  <ul id="items"></ul>
+  <h2>Sensor fallback</h2>
+  <p class="dim">Use this only when Sensor Logger cannot reach the laptop. iPhone Safari shares motion on a secure page, after you tap the button.</p>
+  <button id="enable" type="button">Share compass and motion</button>
+  <p id="status" class="dim">Not sending.</p>
+  <script src="/static/body.js"></script>
+</body>
+</html>

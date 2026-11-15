@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="retrace-auth" content="__AUTH__">
+  <meta name="retrace-token" content="__TOKEN__">
+  <title>ReTrace Desktop</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="desktop">
+  <main>
+    <p class="eyebrow">ReTrace</p>
+    <h1>Place A</h1>
+    <p id="badge" class="badge" aria-live="polite">Connecting</p>
+    <p id="error" class="error" hidden></p>
+    <fieldset>
+      <legend>Camera source</legend>
+      <div class="view-choice">
+        <label><input type="radio" name="cameraSource" value="iphone" checked> iPhone</label>
+        <label><input type="radio" name="cameraSource" value="xiao_usb"> XIAO USB</label>
+      </div>
+      <p class="note">Close the separate XIAO window before choosing XIAO USB. ReTrace then uses that camera for the same 320×240 recognition path, at most 10 frames per second. Choosing iPhone releases the USB port.</p>
+      <section class="stats" aria-label="Camera source">
+        <div class="stat"><span>Camera FPS</span><strong id="cameraFps">—</strong></div>
+        <div class="stat"><span>Processing FPS</span><strong id="processingFps">—</strong></div>
+        <div class="stat"><span>Dropped</span><strong id="cameraDropped">0</strong></div>
+        <div class="stat"><span>Recognition</span><strong id="cameraRecognition">—</strong></div>
+      </section>
+      <p id="cameraDetail" class="detail"></p>
+    </fieldset>
+
+    <div class="debug-captions" aria-hidden="true">
+      <span>Live camera</span>
+      <span>Best matching reference</span>
+    </div>
+    <div id="placeStage" class="stage debug">
+      <canvas id="placeView" width="640" height="240" aria-label="Live frame beside the best saved reference"></canvas>
+      <p id="placePlaceholder" class="placeholder">Waiting for the camera. Green dots are ORB keypoints. Thin lines are descriptor matches. Thick lines are RANSAC inliers.</p>
+    </div>
+    <p id="failureLine" class="failure" aria-live="polite">No decision yet</p>
+    <p id="placeCall" class="place-call compact" aria-live="polite">
+      <span><span class="call-label">Raw</span> <span id="rawCall">—</span></span>
+      <span><span class="call-label">Stable</span> <span id="stableCall">—</span></span>
+    </p>
+    <section class="stats" aria-label="Match diagnostics">
+      <div class="stat"><span>Blur</span><strong id="blurLive">—</strong></div>
+      <div class="stat"><span>ORB features</span><strong id="featureLive">—</strong></div>
+      <div class="stat"><span>Descriptor matches</span><strong id="matchCounts">—</strong></div>
+      <div class="stat"><span>Inliers A / B / C</span><strong id="inlierTriple">—</strong></div>
+    </section>
+    <p id="placeLines" class="detail"></p>
+    <p id="placeDetail" class="detail">Save a few frames of one place, then record without pressing arrival buttons.</p>
+    <p class="note">A name still needs at least 12 inliers and an 8-inlier lead. This page does not lower that rule. Counts are not a distance.</p>
+
+    <fieldset>
+      <legend>One location</legend>
+      <p id="referenceAudit" class="detail">Checking saved references.</p>
+      <div id="referenceStrip" class="ref-strip"></div>
+      <p id="referenceCounts" class="detail">A 0, B 0, C 0</p>
+      <div class="actions">
+        <button id="saveA" class="primary" type="button">Save this frame as A</button>
+        <button id="clearA" class="secondary" type="button">Clear saved A</button>
+      </div>
+      <label class="choices"><input id="saveUnknown" type="checkbox"> Save up to 8 UNKNOWN screenshots on this laptop</label>
+      <div class="actions">
+        <button id="diagnosticStart" class="primary" type="button">Start recording</button>
+        <button id="diagnosticStop" class="secondary" type="button" disabled>Stop recording</button>
+        <button id="downloadPlaces" class="secondary" type="button">Download CSV</button>
+      </div>
+      <p id="diagnosticState" class="detail">Not recording.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Notes afterward</legend>
+      <p class="note">Stop the recording first. Then mark the times you were standing at A, moving only your arm, and back at A after a walk. Leave a row empty if you skipped it. These times only label the frames you point at.</p>
+      <p id="sessionLine" class="detail">No recording in this log yet.</p>
+      <div class="interval-row">
+        <span>Same spot</span>
+        <input id="sameStart" type="datetime-local" step="1" aria-label="Same spot start">
+        <input id="sameEnd" type="datetime-local" step="1" aria-label="Same spot end">
+      </div>
+      <div class="interval-row">
+        <span>Arm only</span>
+        <input id="armStart" type="datetime-local" step="1" aria-label="Arm only start">
+        <input id="armEnd" type="datetime-local" step="1" aria-label="Arm only end">
+      </div>
+      <div class="interval-row">
+        <span>Returned</span>
+        <input id="returnStart" type="datetime-local" step="1" aria-label="Returned start">
+        <input id="returnEnd" type="datetime-local" step="1" aria-label="Returned end">
+      </div>
+      <div class="actions">
+        <button id="applyIntervals" class="primary" type="button">Save these notes</button>
+      </div>
+      <p id="intervalState" class="detail"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Guided experiment</legend>
+      <p class="note">Start this on the phone. Three return trials reuse the 16 saved desk-corner views and do not add references. A name while walking away is not an incorrect match. Incorrect matches are counted only during the unfamiliar hold. Detection latency is reported after you confirm when you were back at the desk. The 12-inlier rule stays.</p>
+      <p id="guideDesktopState" class="detail">No guided experiment yet.</p>
+      <div id="guideDesktopSummary"></div>
+      <div id="trialVerify" hidden></div>
+      <div class="interval-row" id="singleLateRow">
+        <span>Seconds late</span>
+        <input id="lateSeconds" type="number" min="0" max="30" value="0" aria-label="Seconds late arriving back">
+        <button id="correctArrival" class="secondary" type="button">Apply to the scheduled return</button>
+      </div>
+      <div class="actions">
+        <button id="downloadExperiment" class="secondary" type="button">Download experiment CSV</button>
+      </div>
+    </fieldset>
+
+    <details class="extra">
+      <summary>Stream, older tests, and other places</summary>
+      <section class="stats" aria-label="Stream performance">
+        <div class="stat"><span>Status</span><strong id="status">Connecting</strong></div>
+        <div class="stat"><span>FPS</span><strong id="fps">—</strong></div>
+        <div class="stat"><span>Clock delta</span><strong id="latency">—</strong></div>
+        <div class="stat"><span>Frames shown</span><strong id="frames">0</strong></div>
+        <div class="stat"><span>Server FPS</span><strong id="serverFps">—</strong></div>
+        <div class="stat"><span>Frames skipped</span><strong id="skipped">0</strong></div>
+        <div class="stat"><span>Phone</span><strong id="phone">—</strong></div>
+        <div class="stat"><span>Frame size</span><strong id="size">—</strong></div>
+      </section>
+      <div id="stage" class="stage">
+        <canvas id="view" width="320" height="240" aria-label="Live camera frame"></canvas>
+        <p id="placeholder" class="placeholder">Waiting for the iPhone camera.</p>
+        <p id="livetag" class="livetag" hidden>Not live</p>
+      </div>
+      <p class="note">Clock delta mixes travel time and the difference between the phone clock and the laptop clock. It is not a corrected one-way delay.</p>
+
+      <h2>Feature log</h2>
+      <div id="featureStage" class="stage">
+        <canvas id="features" width="320" height="240" aria-label="Camera frame with ORB features"></canvas>
+        <p id="featurePlaceholder" class="placeholder">Waiting for feature analysis.</p>
+      </div>
+      <section class="stats" aria-label="Feature analysis">
+        <div class="stat"><span>ORB features</span><strong id="orbCount">—</strong></div>
+        <div class="stat"><span>Median response</span><strong id="orbResponse">—</strong></div>
+        <div class="stat"><span>Blur score</span><strong id="blurScore">—</strong></div>
+        <div class="stat"><span>Analysis FPS</span><strong id="analysisFps">—</strong></div>
+        <div class="stat"><span>Process time</span><strong id="processMs">—</strong></div>
+        <div class="stat"><span>Logged rows</span><strong id="loggedRows">0</strong></div>
+      </section>
+      <fieldset>
+        <legend>Feasibility CSV</legend>
+        <div class="choices">
+          <label><input type="radio" name="condition" value="palm" checked> Palm-facing</label>
+          <label><input type="radio" name="condition" value="outward"> Outward-facing</label>
+        </div>
+        <div class="actions">
+          <button id="recordStart" class="primary" type="button">Start feature log</button>
+          <button id="recordStop" class="secondary" type="button" disabled>Stop feature log</button>
+          <button id="downloadCsv" class="secondary" type="button">Download feature CSV</button>
+        </div>
+        <p id="recordState" class="detail">Not recording.</p>
+      </fieldset>
+
+      <h2>Other places</h2>
+      <div class="choices">
+        <label><input type="radio" name="place" value="A" checked> Place A</label>
+        <label><input type="radio" name="place" value="B"> Place B</label>
+        <label><input type="radio" name="place" value="C"> Place C</label>
+      </div>
+      <div class="choices">
+        <label><input type="radio" name="placeCamera" value="palm" checked> Palm-facing</label>
+        <label><input type="radio" name="placeCamera" value="outward"> Outward-facing</label>
+      </div>
+      <label class="choices"><input id="saveImages" type="checkbox"> Also save the JPEG for this reference</label>
+      <div class="actions">
+        <button id="saveReference" class="primary" type="button">Save this frame</button>
+        <button id="clearPlace" class="secondary" type="button">Clear this place</button>
+      </div>
+      <fieldset>
+        <legend>Hand mask</legend>
+        <label class="choices"><input id="maskEnabled" type="checkbox"> Ignore keypoints inside a rectangle on the live half</label>
+        <div class="actions">
+          <button id="clearMask" class="secondary" type="button">Clear mask</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Walk marks</legend>
+        <p class="note">The A recording above does not need these. The first press of a mark sets the time. A later press of the same mark does not restart it.</p>
+        <p id="markFlash" class="mark-flash" aria-live="assertive">Optional. Use these only for a full A, B, and C walk.</p>
+        <div class="mark-grid">
+          <button class="mark-btn primary" type="button" data-mark="start">Start test</button>
+          <button class="mark-btn" type="button" data-mark="stop" disabled>End test</button>
+          <button class="mark-btn" type="button" data-mark="LEFT_SAVED_LOCATION" disabled>Left saved location</button>
+          <button class="mark-btn" type="button" data-mark="ARRIVED_A" disabled>Arrived at A</button>
+          <button class="mark-btn" type="button" data-mark="ARRIVED_B" disabled>Arrived at B</button>
+          <button class="mark-btn" type="button" data-mark="ARRIVED_C" disabled>Arrived at C</button>
+        </div>
+        <section class="stats" aria-label="Place match counts">
+          <div class="stat"><span>Inliers A</span><strong id="inliersA">—</strong></div>
+          <div class="stat"><span>Inliers B</span><strong id="inliersB">—</strong></div>
+          <div class="stat"><span>Inliers C</span><strong id="inliersC">—</strong></div>
+          <div class="stat"><span>Match time</span><strong id="matchMs">—</strong></div>
+          <div class="stat"><span>Clock delta</span><strong id="placeClock">—</strong></div>
+        </section>
+        <div class="actions">
+          <button id="clearTests" class="secondary" type="button">Clear test log</button>
+        </div>
+        <p id="testState" class="detail">Not testing.</p>
+        <p id="arrivalLine" class="detail">No arrival marks yet.</p>
+      </fieldset>
+      <h3>Confusion matrix</h3>
+      <div class="table-wrap">
+        <table class="matrix" id="confusion">
+          <thead>
+            <tr>
+              <th>Truth \ Named</th>
+              <th>A</th>
+              <th>B</th>
+              <th>C</th>
+              <th>UNKNOWN</th>
+            </tr>
+          </thead>
+          <tbody id="confusionBody"></tbody>
+        </table>
+      </div>
+      <p id="scoreLine" class="detail">No test frames yet.</p>
+    </details>
+  </main>
+  <script src="/static/desktop.js?v=xiao-usb"></script>
+</body>
+</html>
